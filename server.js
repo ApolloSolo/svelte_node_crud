@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const { PORT, MONGODB_URI } = require("./config");
 const cors = require("cors");
+const path = require("path");
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -18,9 +19,12 @@ mongoose
 
 app.use(require("./routes/index"));
 
-app.get("/get_info", (req, res) => {
-  res.json({ message: "Hello World" });
-});
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/src"));
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "src", "app.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log("Listining on port: " + PORT);
